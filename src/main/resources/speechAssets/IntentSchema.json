@@ -1,7 +1,7 @@
 {
   "intents": [
     {
-      "intent": "AmazonShopIntent",
+      "intent": "SearchKeywordAndCategoryAmazonShopIntent",
       "slots": [
         {
           "name": "category",
@@ -12,6 +12,27 @@
           "type": "LIST_OF_ITEMS"
         }
       ]
+    },
+    {
+      "intent": "SearchKeywordAmazonShopIntent",
+      "slots": [
+        {
+          "name": "item",
+          "type": "LIST_OF_ITEMS"
+        }
+      ]
+    },
+    {
+      "intent": "AskAmazonShopIntent"
+    },
+    {
+      "intent": "AMAZON.NoIntent"
+    },
+    {
+      "intent": "AMAZON.YesIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
     },
     {
       "intent": "AMAZON.HelpIntent"

@@ -1,5 +1,7 @@
 package com.antoniaklja.intent;
 
+import com.amazon.speech.slu.Intent;
+import com.amazon.speech.slu.Slot;
 import com.amazon.speech.speechlet.SpeechletException;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.ui.PlainTextOutputSpeech;
@@ -10,12 +12,25 @@ import com.antoniaklja.generated.Item;
 import com.antoniaklja.helper.ProductAdvertisingConstants;
 import com.antoniaklja.service.ProductsAdvertisingService;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class AmazonShopIntentHandler {
 
+    public static final String ASK_AMAZON_SHOP_INTENT = "AskAmazonShopIntent";
+    public static final String SEARCH_KEYWORD_AMAZON_SHOP_INTENT = "SearchKeywordAmazonShopIntent";
+    public static final String SEARCH_CATEGORY_AMAZON_SHOP_INTENT = "SearchCategoryAmazonShopIntent";
+    public static final String SEARCH_KEYWORD_AND_CATEGORY_AMAZON_SHOP_INTENT = "SearchKeywordAndCategoryAmazonShopIntent";
+    public static final String AMAZON_YES_INTENT = "AMAZON.YesIntent";
+    public static final String AMAZON_NO_INTENT = "AMAZON.NoIntent";
+    public static final String AMAZON_HELP_INTENT = "AMAZON.HelpIntent";
+
     private ProductsAdvertisingClient client;
     private ProductsAdvertisingService service;
+
+    private LastActionState lastState = LastActionState.INITIALIZED;
+    private List<Item> products = new LinkedList<Item>();
 
     public AmazonShopIntentHandler() {
         client = new ProductsAdvertisingClient(
@@ -27,11 +42,21 @@ public class AmazonShopIntentHandler {
         service = new ProductsAdvertisingService(client);
     }
 
-    public SpeechletResponse handleIntent(String intentName) throws SpeechletException {
+    public SpeechletResponse handleIntent(Intent intent) throws SpeechletException {
 
-        if ("AmazonShopIntent".equals(intentName)) {
-            return handleAmazonShopIntent();
-        } else if ("AMAZON.HelpIntent".equals(intentName)) {
+        String intentName = (intent != null) ? intent.getName() : null;
+
+        if (SEARCH_KEYWORD_AMAZON_SHOP_INTENT.equals(intentName)) {
+            return handleSearchKeyword(intent);
+        } else if (SEARCH_KEYWORD_AND_CATEGORY_AMAZON_SHOP_INTENT.equals(intentName)) {
+            return handleSearchKeywordAndCategory(intent);
+        } else if (ASK_AMAZON_SHOP_INTENT.equals(intentName)) {
+            return handleAskAmazonShopIntent();
+        } else if (AMAZON_YES_INTENT.equals(intentName)) {
+            return handleYes();
+        } else if (AMAZON_NO_INTENT.equals(intentName)) {
+            return handleNo();
+        } else if (AMAZON_HELP_INTENT.equals(intentName)) {
             return getHelpResponse();
         } else {
             throw new SpeechletException("Invalid Intent");
@@ -39,11 +64,130 @@ public class AmazonShopIntentHandler {
 
     }
 
+    private SpeechletResponse handleSearchKeyword(Intent intent) {
+
+        Map<String, Slot> slots = intent.getSlots();
+        Slot item = slots.get("item");
+
+        products = service.findProducts(item.getValue());
+
+        int itemSize = products.size();
+
+        String speechText = String.format("I found %d products, would you like to know the names?", itemSize);
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("i found some products");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        lastState = LastActionState.PRODUCTS_FOUND;
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    private SpeechletResponse handleSearchKeywordAndCategory(Intent intent) {
+        Map<String, Slot> slots = intent.getSlots();
+        Slot item = slots.get("item");
+        Slot category = slots.get("category");
+
+        products = service.findProducts(item.getValue(), category.getValue());
+
+        int itemSize = products.size();
+
+        String speechText = String.format("I found %d products, would you like to know the names?", itemSize);
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("i found some products");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        lastState = LastActionState.PRODUCTS_FOUND;
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    private SpeechletResponse handleAskAmazonShopIntent() {
+
+        lastState = LastActionState.ASKED_FOR_CATEGORY;
+        String speechText = "Please tell me category or keyword";
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Give me more information");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
+    }
+
+    private SpeechletResponse handleNo() {
+        products = new LinkedList<Item>();
+        lastState = LastActionState.INITIALIZED;
+
+        String speechText = String.format("So thank you for conversation");
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Finish conversation");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        return SpeechletResponse.newTellResponse(speech, card);
+    }
+
+    private SpeechletResponse handleYes() {
+        StringBuffer sb = new StringBuffer();
+        if (lastState.equals(LastActionState.PRODUCTS_FOUND)) {
+            for (Item product : products) {
+                String title = product.getItemAttributes().getTitle();
+                sb.append(title);
+                sb.append(", ");
+            }
+
+            String speechText = String.format("Product names are : %s", sb.toString());
+
+            SimpleCard card = new SimpleCard();
+            card.setTitle("Products listing");
+            card.setContent(speechText);
+
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(speechText);
+
+            return SpeechletResponse.newTellResponse(speech, card);
+        }
+
+        String speechText = String.format("I don't understand");
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("What?");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        return SpeechletResponse.newTellResponse(speech, card);
+    }
+
     public SpeechletResponse handleWelcomeRequest() {
+        lastState = LastActionState.DIALOG_STARTED;
         return getWelcomeResponse();
     }
 
     private SpeechletResponse getHelpResponse() {
+        lastState = LastActionState.NEED_HELP;
         String speechText = "You can find products on amazon web store!";
 
         SimpleCard card = new SimpleCard();
@@ -57,22 +201,6 @@ public class AmazonShopIntentHandler {
         reprompt.setOutputSpeech(speech);
 
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    private SpeechletResponse handleAmazonShopIntent() {
-        List<Item> products = service.findProducts("hacker book");
-        int itemCount = products.size();
-
-        String speechText = String.format("I found %d products", itemCount);
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Response");
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
     }
 
     private SpeechletResponse getWelcomeResponse() {

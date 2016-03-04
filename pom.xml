@@ -86,36 +86,36 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>1.12</version>
-                <executions>
-                    <execution>
-                        <id>wsimport-from-jdk</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <wsdlUrls>
-                        <wsdlUrl>
-                            http://webservices.amazon.com/AWSECommerceService/AWSECommerceService.wsdl?rw_useCurrentProtocol=1
-                        </wsdlUrl>
-                    </wsdlUrls>
-                     <!--or generate from local resources-->
-                    <!--<wsdlDirectory>src/resources/wsdl</wsdlDirectory>-->
-                    <!--<wsdlFiles>-->
-                    <!--<wsdlFile>productAdvertising.wsdl</wsdlFile>-->
-                    <!--</wsdlFiles>-->
-                    <keep>true</keep>
-                    <packageName>com.antoniaklja.generated</packageName>
-                    <sourceDestDir>${project.basedir}/src/main/java</sourceDestDir>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <!--<build>-->
+        <!--<plugins>-->
+            <!--<plugin>-->
+                <!--<groupId>org.codehaus.mojo</groupId>-->
+                <!--<artifactId>jaxws-maven-plugin</artifactId>-->
+                <!--<version>1.12</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>wsimport-from-jdk</id>-->
+                        <!--<goals>-->
+                            <!--<goal>wsimport</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<wsdlUrls>-->
+                        <!--<wsdlUrl>-->
+                            <!--http://webservices.amazon.com/AWSECommerceService/AWSECommerceService.wsdl?rw_useCurrentProtocol=1-->
+                        <!--</wsdlUrl>-->
+                    <!--</wsdlUrls>-->
+                     <!--&lt;!&ndash;or generate from local resources&ndash;&gt;-->
+                    <!--&lt;!&ndash;<wsdlDirectory>src/resources/wsdl</wsdlDirectory>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<wsdlFiles>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<wsdlFile>productAdvertising.wsdl</wsdlFile>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</wsdlFiles>&ndash;&gt;-->
+                    <!--<keep>true</keep>-->
+                    <!--<packageName>com.antoniaklja.generated</packageName>-->
+                    <!--<sourceDestDir>${project.basedir}/src/main/java</sourceDestDir>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+        <!--</plugins>-->
+    <!--</build>-->
 </project>

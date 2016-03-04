@@ -1,21 +1,10 @@
 package com.antoniaklja.alexa;
 
+import com.amazon.speech.slu.Intent;
+import com.amazon.speech.speechlet.*;
 import com.antoniaklja.intent.AmazonShopIntentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.amazon.speech.slu.Intent;
-import com.amazon.speech.speechlet.IntentRequest;
-import com.amazon.speech.speechlet.LaunchRequest;
-import com.amazon.speech.speechlet.Session;
-import com.amazon.speech.speechlet.SessionEndedRequest;
-import com.amazon.speech.speechlet.SessionStartedRequest;
-import com.amazon.speech.speechlet.Speechlet;
-import com.amazon.speech.speechlet.SpeechletException;
-import com.amazon.speech.speechlet.SpeechletResponse;
-import com.amazon.speech.ui.PlainTextOutputSpeech;
-import com.amazon.speech.ui.Reprompt;
-import com.amazon.speech.ui.SimpleCard;
 
 public class AmazonShopSpeechlet implements Speechlet {
 
@@ -47,9 +36,8 @@ public class AmazonShopSpeechlet implements Speechlet {
                 session.getSessionId());
 
         Intent intent = request.getIntent();
-        String intentName = (intent != null) ? intent.getName() : null;
 
-        return intentHandler.handleIntent(intentName);
+        return intentHandler.handleIntent(intent);
     }
 
     public void onSessionEnded(final SessionEndedRequest request, final Session session)
