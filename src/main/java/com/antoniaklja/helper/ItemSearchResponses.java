@@ -1,11 +1,9 @@
 package com.antoniaklja.helper;
 
-import com.antoniaklja.generated.Item;
-import com.antoniaklja.generated.ItemAttributes;
-import com.antoniaklja.generated.ItemSearchResponse;
-import com.antoniaklja.generated.Items;
+import com.antoniaklja.generated.*;
 
 import java.util.*;
+import java.util.Collections;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
@@ -36,27 +34,28 @@ public class ItemSearchResponses {
         return allItems.get(0).getItem();
     }
 
-    public static List<String> getItemsTitlesAndPrices(ItemSearchResponse response) {
-        checkNotNull(response);
+    public static String extractCardDataFor(Item item) {
+        checkNotNull(item);
 
-        List<Items> allItems = response.getItems();
-        if (allItems != null) {
-            List<String> result = new ArrayList<String>();
-
-            for (Items items : allItems) {
-                for (Item item : items.getItem()) {
-                    ItemAttributes itemAttributes = item.getItemAttributes();
-                    if (itemAttributes.getListPrice() != null) {
-                        result.add("Title " + itemAttributes.getTitle() + ". Price " + itemAttributes.getListPrice().getFormattedPrice());
-                    }
-                }
-            }
-
-            return result;
+        ItemAttributes itemAttributes = item.getItemAttributes();
+        if (itemAttributes.getListPrice() != null) {
+            return String.format("Title %s costs %s \\n %s \\n",
+                    itemAttributes.getTitle(),
+                    itemAttributes.getListPrice().getFormattedPrice(),
+                    extractLinkFrom(item));
         }
+        return "";
+    }
 
-
-        return emptyList();
+    private static String extractLinkFrom(Item item) {
+        ItemLinks itemLinks = item.getItemLinks();
+        if (itemLinks != null) {
+            List<ItemLink> itemLink = itemLinks.getItemLink();
+            if (itemLink.size() > 0) {
+                return itemLink.get(0).getURL();
+            }
+        }
+        return "";
     }
 
     public static String extractTitleAndPrice(Item item) {
@@ -69,4 +68,5 @@ public class ItemSearchResponses {
 
         return "";
     }
+
 }
