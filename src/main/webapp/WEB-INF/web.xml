@@ -6,7 +6,7 @@
   <display-name>Amazon Online Store Skill for Amazon Echo</display-name>
   <servlet>
       <servlet-name>AmazonShopServlet</servlet-name>
-      <servlet-class>com.antoniaklja.AmazonShopServlet</servlet-class>
+      <servlet-class>com.antoniaklja.alexa.AmazonShopServlet</servlet-class>
   </servlet>
   <servlet-mapping>
       <servlet-name>AmazonShopServlet</servlet-name>
