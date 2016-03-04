@@ -24,6 +24,27 @@ Build simple by maven
 
     mvn clean install
 
-## Testing
+Sample dialogs:
 
-    todo
+> You: Alexa open AmazonShop
+
+> Alexa: Welcome, here you can look for products on amazon web store
+
+> You: I'm looking for something
+
+> Alexa: Please tell me keyword or category and keyword
+
+> You: keyword lord of the rings
+
+> Alexa: I found 10 products, would you like to know the names?	
+
+> You: Yes
+
+> Alexa: How many products would you like to be presented?
+
+> You: show me one
+
+> Alexa: Here you are your products : The Lord Of The Rings: The Fellowship Of The Ring costs 2.34$
+
+
+
