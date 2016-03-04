@@ -1,5 +1,6 @@
-package com.antoniaklja;
+package com.antoniaklja.alexa;
 
+import com.antoniaklja.intent.AmazonShopIntentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,12 @@ public class AmazonShopSpeechlet implements Speechlet {
 
     private static final Logger log = LoggerFactory.getLogger(AmazonShopSpeechlet.class);
 
+    private final AmazonShopIntentHandler intentHandler;
+
+    public AmazonShopSpeechlet() {
+        this.intentHandler = new AmazonShopIntentHandler();
+    }
+
     public void onSessionStarted(final SessionStartedRequest request, final Session session)
             throws SpeechletException {
         log.info("onSessionStarted requestId={}, sessionId={}", request.getRequestId(),
@@ -31,7 +38,7 @@ public class AmazonShopSpeechlet implements Speechlet {
             throws SpeechletException {
         log.info("onLaunch requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
-        return getWelcomeResponse();
+        return intentHandler.handleWelcomeRequest();
     }
 
     public SpeechletResponse onIntent(final IntentRequest request, final Session session)
@@ -42,13 +49,7 @@ public class AmazonShopSpeechlet implements Speechlet {
         Intent intent = request.getIntent();
         String intentName = (intent != null) ? intent.getName() : null;
 
-        if ("AmazonShopIntent".equals(intentName)) {
-            return getHelloResponse();
-        } else if ("AMAZON.HelpIntent".equals(intentName)) {
-            return getHelpResponse();
-        } else {
-            throw new SpeechletException("Invalid Intent");
-        }
+        return intentHandler.handleIntent(intentName);
     }
 
     public void onSessionEnded(final SessionEndedRequest request, final Session session)
@@ -56,50 +57,5 @@ public class AmazonShopSpeechlet implements Speechlet {
         log.info("onSessionEnded requestId={}, sessionId={}", request.getRequestId(),
                 session.getSessionId());
         // any cleanup logic goes here
-    }
-
-    private SpeechletResponse getWelcomeResponse() {
-        String speechText = "Welcome, here you can look for products on amazon web store";
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Welcome");
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
-    }
-
-    private SpeechletResponse getHelloResponse() {
-        String speechText = "I found 10 products";
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Response");
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
-    }
-
-    private SpeechletResponse getHelpResponse() {
-        String speechText = "You can find products on amazon web store!";
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle("Some help");
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        Reprompt reprompt = new Reprompt();
-        reprompt.setOutputSpeech(speech);
-
-        return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 }

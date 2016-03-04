@@ -1,4 +1,4 @@
-package com.antoniaklja;
+package com.antoniaklja.alexa;
 
 import com.amazon.speech.speechlet.servlet.SpeechletServlet;
 
