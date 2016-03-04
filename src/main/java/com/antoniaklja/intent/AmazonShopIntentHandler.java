@@ -9,9 +9,12 @@ import com.amazon.speech.ui.Reprompt;
 import com.amazon.speech.ui.SimpleCard;
 import com.antoniaklja.client.ProductsAdvertisingClient;
 import com.antoniaklja.generated.Item;
+import com.antoniaklja.generated.ItemLink;
+import com.antoniaklja.generated.ItemLinks;
 import com.antoniaklja.helper.ProductAdvertisingConstants;
 import com.antoniaklja.service.ProductsAdvertisingService;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ public class AmazonShopIntentHandler {
 
     private LastActionState lastState = LastActionState.INITIALIZED;
     private List<Item> products = new LinkedList<Item>();
+    private Map<String, String> titlesAndLinks = new HashMap<String, String>();
 
     public AmazonShopIntentHandler() {
         client = new ProductsAdvertisingClient(
@@ -153,6 +157,13 @@ public class AmazonShopIntentHandler {
         if (lastState.equals(LastActionState.PRODUCTS_FOUND)) {
             for (Item product : products) {
                 String title = product.getItemAttributes().getTitle();
+                ItemLinks itemLinksAttr = product.getItemLinks();
+                if (itemLinksAttr != null) {
+                    List<ItemLink> itemLinks = itemLinksAttr.getItemLink();
+                    if (itemLinks.size() > 0) {
+                        titlesAndLinks.put(title, itemLinks.get(0).getURL());
+                    }
+                }
                 sb.append(title);
                 sb.append(", ");
             }
