@@ -1,5 +1,6 @@
-AmazonShopIntent look for
+AmazonShopIntent look for {item}
+AmazonShopIntent look for {item} in {category}
 AmazonShopIntent i would like to find something
 AmazonShopIntent i want find something
-AmazonShopIntent i want find
-AmazonShopIntent i will have
+AmazonShopIntent i want find {category}
+AmazonShopIntent i will have {item}

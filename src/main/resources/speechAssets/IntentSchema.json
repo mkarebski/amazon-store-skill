@@ -1,7 +1,17 @@
 {
   "intents": [
     {
-      "intent": "AmazonShopIntent"
+      "intent": "AmazonShopIntent",
+      "slots": [
+        {
+          "name": "category",
+          "type": "LIST_OF_CATEGORIES"
+        },
+        {
+          "name": "item",
+          "type": "LIST_OF_ITEMS"
+        }
+      ]
     },
     {
       "intent": "AMAZON.HelpIntent"
