@@ -12,6 +12,7 @@ import com.antoniaklja.generated.Item;
 import com.antoniaklja.helper.ProductAdvertisingConstants;
 import com.antoniaklja.service.ProductsAdvertisingService;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class AmazonShopIntentHandler {
 
     private LastActionState lastState = LastActionState.INITIALIZED;
     private List<Item> products = new LinkedList<Item>();
+    private Map<String, String> titlesAndLinks = new HashMap<String, String>();
 
     public AmazonShopIntentHandler() {
         client = new ProductsAdvertisingClient(
@@ -38,7 +40,8 @@ public class AmazonShopIntentHandler {
                 ProductAdvertisingConstants.AWS_ACCESS_KEY_ID,
                 ProductAdvertisingConstants.AWS_SECRET_KEY,
                 ProductAdvertisingConstants.AWS_ASSOCIATES_KEY
-        );        lastState = LastActionState.INITIALIZED;
+        );
+        lastState = LastActionState.INITIALIZED;
 
         service = new ProductsAdvertisingService(client);
     }
@@ -53,7 +56,7 @@ public class AmazonShopIntentHandler {
             return handleSearchKeywordAndCategory(intent);
         } else if (ASK_AMAZON_SHOP_INTENT.equals(intentName)) {
             return handleAskAmazonShopIntent();
-        }else if (SEARCH_SIZE.equals(intentName)) {
+        } else if (SEARCH_SIZE.equals(intentName)) {
             return handleSearchSize(intent);
         } else if (AMAZON_YES_INTENT.equals(intentName)) {
             return handleYes();
