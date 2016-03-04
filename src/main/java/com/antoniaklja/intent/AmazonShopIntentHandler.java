@@ -20,8 +20,8 @@ public class AmazonShopIntentHandler {
 
     public static final String ASK_AMAZON_SHOP_INTENT = "AskAmazonShopIntent";
     public static final String SEARCH_KEYWORD_AMAZON_SHOP_INTENT = "SearchKeywordAmazonShopIntent";
-    public static final String SEARCH_CATEGORY_AMAZON_SHOP_INTENT = "SearchCategoryAmazonShopIntent";
     public static final String SEARCH_KEYWORD_AND_CATEGORY_AMAZON_SHOP_INTENT = "SearchKeywordAndCategoryAmazonShopIntent";
+    public static final String SEARCH_SIZE = "SearchSizeAmazonShopIntent";
     public static final String AMAZON_YES_INTENT = "AMAZON.YesIntent";
     public static final String AMAZON_NO_INTENT = "AMAZON.NoIntent";
     public static final String AMAZON_HELP_INTENT = "AMAZON.HelpIntent";
@@ -38,7 +38,8 @@ public class AmazonShopIntentHandler {
                 ProductAdvertisingConstants.AWS_ACCESS_KEY_ID,
                 ProductAdvertisingConstants.AWS_SECRET_KEY,
                 ProductAdvertisingConstants.AWS_ASSOCIATES_KEY
-        );
+        );        lastState = LastActionState.INITIALIZED;
+
         service = new ProductsAdvertisingService(client);
     }
 
@@ -52,6 +53,8 @@ public class AmazonShopIntentHandler {
             return handleSearchKeywordAndCategory(intent);
         } else if (ASK_AMAZON_SHOP_INTENT.equals(intentName)) {
             return handleAskAmazonShopIntent();
+        }else if (SEARCH_SIZE.equals(intentName)) {
+            return handleSearchSize(intent);
         } else if (AMAZON_YES_INTENT.equals(intentName)) {
             return handleYes();
         } else if (AMAZON_NO_INTENT.equals(intentName)) {
@@ -59,9 +62,58 @@ public class AmazonShopIntentHandler {
         } else if (AMAZON_HELP_INTENT.equals(intentName)) {
             return getHelpResponse();
         } else {
-            throw new SpeechletException("Invalid Intent");
+            return handleInvalidIntent();
+        }
+    }
+
+    private SpeechletResponse handleSearchSize(Intent intent) {
+        if (lastState.equals(LastActionState.ASKED_FOR_SEARCH_SIZE)) {
+
+            Map<String, Slot> slots = intent.getSlots();
+            Slot slotNumber = slots.get("number");
+            Integer number = Integer.valueOf(slotNumber.getValue());
+
+            StringBuilder sb = new StringBuilder();
+            int i = 1;
+            for (int j = 0; j < number; j++) {
+                Item item = products.get(j);
+                String title = item.getItemAttributes().getTitle();
+                sb.append(i + "" + title);
+                sb.append("\n");
+                i++;
+            }
+
+            String speechText = String.format("Here you are your products : %s", sb.toString());
+
+            SimpleCard card = new SimpleCard();
+            card.setTitle("Products listing");
+            card.setContent(speechText);
+
+            PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+            speech.setText(speechText);
+
+            lastState = LastActionState.ASKED_FOR_PRUCTS_NAMES;
+            return SpeechletResponse.newTellResponse(speech, card);
         }
 
+        return handleInvalidIntent();
+    }
+
+    private SpeechletResponse handleInvalidIntent() {
+        String speechText = "I don't understand you, please say again.";
+
+        SimpleCard card = new SimpleCard();
+        card.setTitle("Problem");
+        card.setContent(speechText);
+
+        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
+        speech.setText(speechText);
+
+        Reprompt reprompt = new Reprompt();
+        reprompt.setOutputSpeech(speech);
+
+        lastState = LastActionState.NEED_HELP;
+        return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 
     private SpeechletResponse handleSearchKeyword(Intent intent) {
@@ -73,7 +125,7 @@ public class AmazonShopIntentHandler {
 
         int itemSize = products.size();
 
-        String speechText = String.format("I found %d products, would you like to know the names?", itemSize);
+        String speechText = String.format("I found %d products, would you like to know more?", itemSize);
 
         SimpleCard card = new SimpleCard();
         card.setTitle("i found some products");
@@ -98,7 +150,7 @@ public class AmazonShopIntentHandler {
 
         int itemSize = products.size();
 
-        String speechText = String.format("I found %d products, would you like to know the names?", itemSize);
+        String speechText = String.format("I found %d products, would you like to know more?", itemSize);
 
         SimpleCard card = new SimpleCard();
         card.setTitle("i found some products");
@@ -116,8 +168,7 @@ public class AmazonShopIntentHandler {
 
     private SpeechletResponse handleAskAmazonShopIntent() {
 
-        lastState = LastActionState.ASKED_FOR_CATEGORY;
-        String speechText = "Please tell me category or keyword";
+        String speechText = "Please tell me keyword or category and keyword";
 
         SimpleCard card = new SimpleCard();
         card.setTitle("Give me more information");
@@ -129,12 +180,12 @@ public class AmazonShopIntentHandler {
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
+        lastState = LastActionState.ASKED_FOR_CATEGORY;
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 
     private SpeechletResponse handleNo() {
         products = new LinkedList<Item>();
-        lastState = LastActionState.INITIALIZED;
 
         String speechText = String.format("So thank you for conversation");
 
@@ -145,40 +196,29 @@ public class AmazonShopIntentHandler {
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
         speech.setText(speechText);
 
+        lastState = LastActionState.INITIALIZED;
         return SpeechletResponse.newTellResponse(speech, card);
     }
 
     private SpeechletResponse handleYes() {
-        StringBuffer sb = new StringBuffer();
         if (lastState.equals(LastActionState.PRODUCTS_FOUND)) {
-            for (Item product : products) {
-                String title = product.getItemAttributes().getTitle();
-                sb.append(title);
-                sb.append(", ");
-            }
-
-            String speechText = String.format("Product names are : %s", sb.toString());
+            String speechText = "How many?";
 
             SimpleCard card = new SimpleCard();
-            card.setTitle("Products listing");
+            card.setTitle("Search size");
             card.setContent(speechText);
 
             PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
             speech.setText(speechText);
 
-            return SpeechletResponse.newTellResponse(speech, card);
+            Reprompt reprompt = new Reprompt();
+            reprompt.setOutputSpeech(speech);
+
+            lastState = LastActionState.ASKED_FOR_SEARCH_SIZE;
+            return SpeechletResponse.newAskResponse(speech, reprompt, card);
         }
 
-        String speechText = String.format("I don't understand");
-
-        SimpleCard card = new SimpleCard();
-        card.setTitle("What?");
-        card.setContent(speechText);
-
-        PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
-        speech.setText(speechText);
-
-        return SpeechletResponse.newTellResponse(speech, card);
+        return handleInvalidIntent();
     }
 
     public SpeechletResponse handleWelcomeRequest() {
@@ -187,7 +227,6 @@ public class AmazonShopIntentHandler {
     }
 
     private SpeechletResponse getHelpResponse() {
-        lastState = LastActionState.NEED_HELP;
         String speechText = "You can find products on amazon web store!";
 
         SimpleCard card = new SimpleCard();
@@ -200,6 +239,7 @@ public class AmazonShopIntentHandler {
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
+        lastState = LastActionState.NEED_HELP;
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 
@@ -216,6 +256,7 @@ public class AmazonShopIntentHandler {
         Reprompt reprompt = new Reprompt();
         reprompt.setOutputSpeech(speech);
 
+        lastState = LastActionState.INITIALIZED;
         return SpeechletResponse.newAskResponse(speech, reprompt, card);
     }
 

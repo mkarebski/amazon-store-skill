@@ -23,6 +23,15 @@
       ]
     },
     {
+      "intent": "SearchSizeAmazonShopIntent",
+      "slots": [
+        {
+          "name": "number",
+          "type": "AMAZON.NUMBER"
+        }
+      ]
+    },
+    {
       "intent": "AskAmazonShopIntent"
     },
     {
