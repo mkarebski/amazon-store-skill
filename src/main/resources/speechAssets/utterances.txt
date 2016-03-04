@@ -5,5 +5,5 @@ SearchKeywordAmazonShopIntent keyword {item}
 SearchKeywordAmazonShopIntent look for {item}
 SearchKeywordAndCategoryAmazonShopIntent keyword {item} category {category}
 SearchKeywordAndCategoryAmazonShopIntent category {category} keyword {item}
-SearchSizeAmazonShopIntent show me {number}
 SearchKeywordAndCategoryAmazonShopIntent look for {item} in category {category}
+SearchSizeAmazonShopIntent show me {number}

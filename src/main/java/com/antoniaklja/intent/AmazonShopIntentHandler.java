@@ -12,7 +12,6 @@ import com.antoniaklja.generated.Item;
 import com.antoniaklja.helper.ProductAdvertisingConstants;
 import com.antoniaklja.service.ProductsAdvertisingService;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ public class AmazonShopIntentHandler {
 
     private LastActionState lastState = LastActionState.INITIALIZED;
     private List<Item> products = new LinkedList<Item>();
-    private Map<String, String> titlesAndLinks = new HashMap<String, String>();
 
     public AmazonShopIntentHandler() {
         client = new ProductsAdvertisingClient(
@@ -131,7 +129,7 @@ public class AmazonShopIntentHandler {
         String speechText = String.format("I found %d products, would you like to know more?", itemSize);
 
         SimpleCard card = new SimpleCard();
-        card.setTitle("i found some products");
+        card.setTitle("I found some products");
         card.setContent(speechText);
 
         PlainTextOutputSpeech speech = new PlainTextOutputSpeech();
@@ -190,7 +188,7 @@ public class AmazonShopIntentHandler {
     private SpeechletResponse handleNo() {
         products = new LinkedList<Item>();
 
-        String speechText = String.format("So thank you for conversation");
+        String speechText = "So thank you for conversation";
 
         SimpleCard card = new SimpleCard();
         card.setTitle("Finish conversation");
